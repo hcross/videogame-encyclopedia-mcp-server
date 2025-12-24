@@ -88,12 +88,23 @@ Add this server to your Claude Desktop configuration file:
 
 Restart Claude Desktop to load the server.
 
-### With Other MCP Clients
+### Quick Installation/Launch
 
-The server uses stdio transport and can be integrated with any MCP-compatible client. Run:
-
+#### Via Smithery
+You can install this server into your MCP client (like Claude Desktop) with one command:
 ```bash
-npm start
+npx -y @smithery/cli@latest install videogame-encyclopedia-mcp-server --client claude
+```
+
+#### Via uvx
+If you have `uv` installed, you can run the server directly (requires Node.js locally):
+```bash
+uvx --from node game-encyclopedia-mcp
+```
+
+#### Via npx
+```bash
+npx videogame-encyclopedia-mcp-server
 ```
 
 ## Available Tools
