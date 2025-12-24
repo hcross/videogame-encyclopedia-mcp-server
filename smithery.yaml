@@ -1,0 +1,21 @@
+# Smithery configuration for Game Encyclopedia MCP Server
+# For more info, see https://smithery.ai/docs/config
+
+runtime: node
+build:
+  command: npm run build
+start:
+  command: node dist/index.js
+  transport: stdio
+configSchema:
+  type: object
+  properties:
+    STEAM_API_KEY:
+      type: string
+      description: Steam Web API Key (https://steamcommunity.com/dev/apikey)
+    STEAMGRIDDB_API_KEY:
+      type: string
+      description: SteamGridDB API Key (https://www.steamgriddb.com/profile/preferences/api)
+  required:
+    - STEAM_API_KEY
+    - STEAMGRIDDB_API_KEY
