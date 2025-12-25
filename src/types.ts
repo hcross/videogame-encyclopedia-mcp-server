@@ -9,8 +9,10 @@ export interface SteamApp {
 }
 
 export interface SteamAppListResponse {
-    applist: {
+    response: {
         apps: SteamApp[];
+        have_more_results?: boolean;
+        last_appid?: number;
     };
 }
 
@@ -94,6 +96,8 @@ export interface SteamGridAssetsResponse {
 }
 
 // MCP Tool Input Schemas
+import { Config } from './config.js';
+
 export interface SteamSearchInput {
     query: string;
     limit?: number;
@@ -102,6 +106,7 @@ export interface SteamSearchInput {
 export interface SteamDetailsInput {
     appid: number;
 }
+
 
 export interface SteamGridSearchInput {
     query: string;

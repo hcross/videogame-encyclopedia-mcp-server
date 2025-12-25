@@ -6,7 +6,7 @@ import type {
     SteamDetailsInput,
 } from '../types.js';
 
-const STEAM_APP_LIST_URL = 'https://api.steampowered.com/ISteamApps/GetAppList/v2/';
+const STEAM_APP_LIST_URL = 'https://api.steampowered.com/IStoreService/GetAppList/v1/';
 const STEAM_APP_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
 
 // Cache for the app list to avoid repeated requests
@@ -14,23 +14,31 @@ let appListCache: SteamAppListResponse | null = null;
 let appListCacheTime = 0;
 const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24 hours
 
+import { Config } from '../config.js';
+
 /**
  * Search for games on Steam by name
  */
-export async function searchSteamGames(input: SteamSearchInput) {
+export async function searchSteamGames(input: SteamSearchInput, config: Config) {
     const { query, limit = 10 } = input;
 
     // Get or update app list cache
     const now = Date.now();
     if (!appListCache || now - appListCacheTime > CACHE_DURATION) {
-        const response = await axios.get<SteamAppListResponse>(STEAM_APP_LIST_URL);
+        const response = await axios.get<SteamAppListResponse>(STEAM_APP_LIST_URL, {
+            params: {
+                key: config.steamApiKey,
+                max_results: 50000,
+            }
+        });
         appListCache = response.data;
         appListCacheTime = now;
     }
 
     // Filter apps by query (case-insensitive)
     const lowerQuery = query.toLowerCase();
-    const matches = appListCache.applist.apps
+    const apps = appListCache.response.apps || [];
+    const matches = apps
         .filter((app) => app.name.toLowerCase().includes(lowerQuery))
         .slice(0, limit);
 
@@ -43,7 +51,7 @@ export async function searchSteamGames(input: SteamSearchInput) {
 /**
  * Get detailed information about a Steam game by App ID
  */
-export async function getSteamGameDetails(input: SteamDetailsInput) {
+export async function getSteamGameDetails(input: SteamDetailsInput, _config: Config) {
     const { appid } = input;
 
     const response = await axios.get<{ [key: string]: SteamAppDetails }>(
