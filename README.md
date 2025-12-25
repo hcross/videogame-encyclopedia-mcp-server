@@ -1,4 +1,4 @@
-# Game Encyclopedia MCP Server
+# Videogame Encyclopedia MCP Server
 
 A Model Context Protocol (MCP) server that provides structured video game information from Steam and SteamGridDB. This server exposes tools for searching games and retrieving comprehensive metadata including descriptions, categories, release dates, player counts, and visual assets like logos, boxart, and icons.
 
@@ -99,13 +99,16 @@ npx -y @smithery/cli@latest install videogame-encyclopedia-mcp-server --client c
 #### Via uvx
 If you have `uv` installed, you can run the server directly (requires Node.js locally):
 ```bash
-uvx --from node game-encyclopedia-mcp
+uvx --from node videogame-encyclopedia-mcp-server
 ```
 
 #### Via npx
 ```bash
 npx videogame-encyclopedia-mcp-server
 ```
+
+> [!NOTE]
+> To publish this package to NPM, you must set an `NPM_TOKEN` secret in your GitHub repository settings.
 
 ## Available Tools
 
