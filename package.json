@@ -1,11 +1,11 @@
 {
-  "name": "game-encyclopedia-mcp-server",
+  "name": "videogame-encyclopedia-mcp-server",
   "version": "1.0.0",
   "description": "MCP server providing structured video game information from Steam and SteamGridDB",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "game-encyclopedia-mcp": "dist/index.js"
+    "videogame-encyclopedia-mcp-server": "dist/index.js"
   },
   "files": [
     "dist",
