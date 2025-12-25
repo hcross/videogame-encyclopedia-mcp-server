@@ -10,12 +10,8 @@ start:
 configSchema:
   type: object
   properties:
-    STEAM_API_KEY:
-      type: string
-      description: Steam Web API Key (https://steamcommunity.com/dev/apikey)
     STEAMGRIDDB_API_KEY:
       type: string
-      description: SteamGridDB API Key (https://www.steamgriddb.com/profile/preferences/api)
+      description: API Key for SteamGridDB
   required:
-    - STEAM_API_KEY
     - STEAMGRIDDB_API_KEY

@@ -122,7 +122,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     try {
         switch (name) {
             case 'steam_search_game': {
-                const result = await searchSteamGames(args as any, config);
+                const result = await searchSteamGames(args as any);
                 return {
                     content: [
                         {
@@ -134,7 +134,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             }
 
             case 'steam_get_details': {
-                const result = await getSteamGameDetails(args as any, config);
+                const result = await getSteamGameDetails(args as any);
                 return {
                     content: [
                         {

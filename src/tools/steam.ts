@@ -1,46 +1,33 @@
 import axios from 'axios';
 import type {
-    SteamAppListResponse,
+    SteamStoreSearchResponse,
     SteamAppDetails,
     SteamSearchInput,
     SteamDetailsInput,
 } from '../types.js';
-
-const STEAM_APP_LIST_URL = 'https://api.steampowered.com/IStoreService/GetAppList/v1/';
-const STEAM_APP_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
-
-// Cache for the app list to avoid repeated requests
-let appListCache: SteamAppListResponse | null = null;
-let appListCacheTime = 0;
-const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24 hours
-
 import { Config } from '../config.js';
 
+const STORE_SEARCH_URL = 'https://store.steampowered.com/api/storesearch/';
+const STEAM_APP_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
+
 /**
- * Search for games on Steam by name
+ * Search for games on Steam by name using the public Store Search API
  */
-export async function searchSteamGames(input: SteamSearchInput, config: Config) {
+export async function searchSteamGames(input: SteamSearchInput) {
     const { query, limit = 10 } = input;
 
-    // Get or update app list cache
-    const now = Date.now();
-    if (!appListCache || now - appListCacheTime > CACHE_DURATION) {
-        const response = await axios.get<SteamAppListResponse>(STEAM_APP_LIST_URL, {
-            params: {
-                key: config.steamApiKey,
-                max_results: 50000,
-            }
-        });
-        appListCache = response.data;
-        appListCacheTime = now;
-    }
+    const response = await axios.get<SteamStoreSearchResponse>(STORE_SEARCH_URL, {
+        params: {
+            term: query,
+            l: 'english',
+            cc: 'US'
+        }
+    });
 
-    // Filter apps by query (case-insensitive)
-    const lowerQuery = query.toLowerCase();
-    const apps = appListCache.response.apps || [];
-    const matches = apps
-        .filter((app) => app.name.toLowerCase().includes(lowerQuery))
-        .slice(0, limit);
+    const matches = response.data.items.map(item => ({
+        appid: item.id,
+        name: item.name
+    })).slice(0, limit);
 
     return {
         results: matches,
@@ -51,10 +38,10 @@ export async function searchSteamGames(input: SteamSearchInput, config: Config) 
 /**
  * Get detailed information about a Steam game by App ID
  */
-export async function getSteamGameDetails(input: SteamDetailsInput, _config: Config) {
+export async function getSteamGameDetails(input: SteamDetailsInput) {
     const { appid } = input;
 
-    const response = await axios.get<{ [key: string]: SteamAppDetails }>(
+    const response = await axios.get<{ [key: string]: { success: boolean; data?: SteamAppDetails } }>(
         STEAM_APP_DETAILS_URL,
         {
             params: { appids: appid },
@@ -83,8 +70,8 @@ export async function getSteamGameDetails(input: SteamDetailsInput, _config: Con
         publishers: data.publishers || [],
         price: data.price_overview,
         platforms: data.platforms,
-        categories: data.categories?.map((c) => c.description) || [],
-        genres: data.genres?.map((g) => g.description) || [],
+        categories: data.categories?.map((c: any) => c.description) || [],
+        genres: data.genres?.map((g: any) => g.description) || [],
         release_date: data.release_date,
         is_free: data.is_free,
         supported_languages: data.supported_languages,

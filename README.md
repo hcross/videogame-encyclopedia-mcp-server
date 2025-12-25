@@ -50,13 +50,23 @@ A Model Context Protocol (MCP) server that provides structured video game inform
    ```
 
    Edit `.env` and add your API keys:
-   - **Steam API Key**: Get from https://steamcommunity.com/dev/apikey
-   - **SteamGridDB API Key**: Get from https://www.steamgriddb.com/profile/preferences/api
+   - **SteamGridDB API Key**: Required for high-quality game assets (grids, heroes, logos). Get it at [steamgriddb.com](https://www.steamgriddb.com/profile/api).
 
-   ```env
-   STEAM_API_KEY=your_steam_api_key_here
-   STEAMGRIDDB_API_KEY=your_steamgriddb_api_key_here
-   ```
+## Configuration
+
+The server requires the following environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `STEAMGRIDDB_API_KEY` | Your SteamGridDB API key |
+
+## Setup
+
+### 1. Environment Variables
+Create a `.env` file in the root directory:
+```env
+STEAMGRIDDB_API_KEY=your_steamgriddb_key_here
+```
 
 4. **Build the project**
    ```bash
