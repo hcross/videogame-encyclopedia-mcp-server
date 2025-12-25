@@ -1,6 +1,6 @@
 {
   "name": "videogame-encyclopedia-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server providing structured video game information from Steam and SteamGridDB",
   "type": "module",
   "main": "dist/index.js",
