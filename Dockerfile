@@ -27,7 +27,6 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 
 # Set environment variables (placeholder values)
-ENV STEAM_API_KEY=""
 ENV STEAMGRIDDB_API_KEY=""
 
 # The command to run the server

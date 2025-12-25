@@ -8,56 +8,55 @@ export interface SteamApp {
     name: string;
 }
 
-export interface SteamAppListResponse {
-    applist: {
-        apps: SteamApp[];
-    };
-}
-
-export interface SteamAppDetails {
-    success: boolean;
-    data?: {
+export interface SteamStoreSearchResponse {
+    total: number;
+    items: {
+        id: number;
         name: string;
-        type: string;
-        steam_appid: number;
-        required_age: number;
-        is_free: boolean;
-        detailed_description: string;
-        short_description: string;
-        about_the_game: string;
-        supported_languages: string;
-        header_image: string;
-        capsule_image: string;
-        capsule_imagev5: string;
-        website?: string;
-        developers?: string[];
-        publishers?: string[];
-        price_overview?: {
+        price?: {
             currency: string;
             initial: number;
             final: number;
-            discount_percent: number;
-            initial_formatted: string;
-            final_formatted: string;
         };
-        platforms: {
+        platforms?: {
             windows: boolean;
             mac: boolean;
             linux: boolean;
         };
-        categories?: Array<{
-            id: number;
-            description: string;
-        }>;
-        genres?: Array<{
-            id: string;
-            description: string;
-        }>;
-        release_date: {
-            coming_soon: boolean;
-            date: string;
-        };
+    }[];
+}
+
+export interface SteamAppDetails {
+    steam_appid: number;
+    name: string;
+    type: string;
+    short_description: string;
+    detailed_description: string;
+    about_the_game: string;
+    header_image: string;
+    capsule_image: string;
+    website: string;
+    developers?: string[];
+    publishers?: string[];
+    price_overview?: {
+        currency: string;
+        initial: number;
+        final: number;
+        final_formatted: string;
     };
+    platforms: {
+        windows: boolean;
+        mac: boolean;
+        linux: boolean;
+    };
+    categories?: { id: number; description: string }[];
+    genres?: { id: string; description: string }[];
+    release_date: {
+        coming_soon: boolean;
+        date: string;
+    };
+    is_free: boolean;
+    supported_languages: string;
 }
 
 // SteamGridDB API Types
@@ -102,6 +101,7 @@ export interface SteamSearchInput {
 export interface SteamDetailsInput {
     appid: number;
 }
+
 
 export interface SteamGridSearchInput {
     query: string;
