@@ -9,6 +9,7 @@ import {
 import { loadConfig } from './config.js';
 import { searchSteamGames, getSteamGameDetails } from './tools/steam.js';
 import { searchSteamGridGames, getSteamGridAssets } from './tools/steamgrid.js';
+import { getFullGameProfile } from './tools/unified.js';
 
 // Load configuration
 let config;
@@ -111,6 +112,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                     required: ['gameId'],
                 },
             },
+            {
+                name: 'game_get_full_profile',
+                description:
+                    'Get a comprehensive game profile including metadata from Steam and visual assets (logo, hero, grid, icon) from SteamGridDB in a single request. This is the recommended tool for getting a complete overview of a game.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        query: {
+                            type: 'string',
+                            description: 'The game name to search for',
+                        },
+                    },
+                    required: ['query'],
+                },
+            },
         ],
     };
 });
@@ -159,6 +175,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case 'steamgrid_get_assets': {
                 const result = await getSteamGridAssets(args as any, config);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'game_get_full_profile': {
+                const result = await getFullGameProfile(args as any, config);
                 return {
                     content: [
                         {
