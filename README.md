@@ -24,6 +24,9 @@ A Model Context Protocol (MCP) server that provides structured video game inform
   - Icons
   - Multiple variations with metadata (dimensions, MIME type, author)
 
+### Unified Tools
+- **game_get_full_profile**: Get a comprehensive game profile in a single request, aggregating metadata from Steam and community visual assets from SteamGridDB. This is the **recommended tool** for providing a complete overview of a game.
+
 ## Installation
 
 ### Prerequisites
@@ -181,6 +184,20 @@ Get visual assets for a game from SteamGridDB.
 }
 ```
 
+### 5. game_get_full_profile
+
+Get a comprehensive game profile combining metadata from Steam and visual assets from SteamGridDB. This tool automatically handles the mapping between Steam and SteamGridDB.
+
+**Input:**
+- `query` (string, required): Game name to search for
+
+**Example:**
+```json
+{
+  "query": "Elden Ring"
+}
+```
+
 ## Development
 
 ### Scripts
@@ -199,7 +216,8 @@ game-encyclopedia-mcp-server/
 │   ├── types.ts           # TypeScript type definitions
 │   └── tools/
 │       ├── steam.ts       # Steam API integration
-│       └── steamgrid.ts   # SteamGridDB API integration
+│       ├── steamgrid.ts   # SteamGridDB API integration
+│       └── unified.ts     # Unified search tool implementation
 ├── package.json
 ├── tsconfig.json
 └── .env.example
