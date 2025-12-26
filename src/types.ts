@@ -111,3 +111,30 @@ export interface SteamGridAssetsInput {
     gameId: number;
     assetTypes?: ('grid' | 'hero' | 'logo' | 'icon')[];
 }
+// Unified Tool Types
+export interface UnifiedSearchInput {
+    query: string;
+}
+
+export interface UnifiedGameProfile {
+    metadata: {
+        appid: number;
+        name: string;
+        type: string;
+        short_description: string;
+        developers: string[];
+        publishers: string[];
+        release_date: string;
+        genres: string[];
+        categories: string[];
+        price?: string;
+        website?: string;
+    };
+    assets: {
+        header_image?: string; // From Steam
+        hero?: string;        // From SteamGridDB
+        logo?: string;        // From SteamGridDB
+        icon?: string;        // From SteamGridDB
+        grid?: string;        // From SteamGridDB
+    };
+}

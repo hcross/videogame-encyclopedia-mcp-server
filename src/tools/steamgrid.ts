@@ -5,6 +5,7 @@ import type {
     SteamGridAssetsResponse,
     SteamGridSearchInput,
     SteamGridAssetsInput,
+    SteamGridGame,
 } from '../types.js';
 
 const STEAMGRID_BASE_URL = 'https://www.steamgriddb.com/api/v2';
@@ -66,7 +67,8 @@ export async function getSteamGridAssets(
     // Fetch each asset type
     for (const assetType of assetTypes) {
         try {
-            const endpoint = `${STEAMGRID_BASE_URL}/${assetType}s/game/${gameId}`;
+            const pluralType = assetType === 'hero' ? 'heroes' : `${assetType}s`;
+            const endpoint = `${STEAMGRID_BASE_URL}/${pluralType}/game/${gameId}`;
             const response = await axios.get<SteamGridAssetsResponse>(endpoint, {
                 headers: {
                     Authorization: `Bearer ${config.steamGridDbApiKey}`,
@@ -94,4 +96,31 @@ export async function getSteamGridAssets(
         gameId,
         assets,
     };
+}
+
+/**
+ * Find a SteamGridDB game by its Steam App ID
+ */
+export async function getSteamGridGameBySteamId(
+    steamId: number,
+    config: Config
+) {
+    try {
+        const response = await axios.get<{
+            success: boolean;
+            data: SteamGridGame;
+        }>(`${STEAMGRID_BASE_URL}/games/steam/${steamId}`, {
+            headers: {
+                Authorization: `Bearer ${config.steamGridDbApiKey}`,
+            },
+        });
+
+        if (response.data.success) {
+            return response.data.data;
+        }
+        return null;
+    } catch (error) {
+        console.error(`Failed to find SteamGridDB game for Steam ID ${steamId}:`, error);
+        return null;
+    }
 }
