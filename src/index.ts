@@ -7,7 +7,7 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { loadConfig } from './config.js';
-import { searchSteamGames, getSteamGameDetails } from './tools/steam.js';
+import { searchSteamGames, getSteamGameDetails, getSteamDLCList } from './tools/steam.js';
 import { searchSteamGridGames, getSteamGridAssets } from './tools/steamgrid.js';
 import { getFullGameProfile } from './tools/unified.js';
 
@@ -113,6 +113,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 },
             },
             {
+                name: 'steam_get_dlc_list',
+                description:
+                    'Get a list of all available DLCs for a specific Steam game by its App ID. Returns the App ID and name for each DLC.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        appid: {
+                            type: 'number',
+                            description: 'The Steam App ID of the main game',
+                        },
+                    },
+                    required: ['appid'],
+                },
+            },
+            {
                 name: 'game_get_full_profile',
                 description:
                     'Get a comprehensive game profile including metadata from Steam and visual assets (logo, hero, grid, icon) from SteamGridDB in a single request. This is the recommended tool for getting a complete overview of a game.',
@@ -151,6 +166,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case 'steam_get_details': {
                 const result = await getSteamGameDetails(args as any);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'steam_get_dlc_list': {
+                const result = await getSteamDLCList(args as any);
                 return {
                     content: [
                         {

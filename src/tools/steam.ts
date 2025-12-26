@@ -4,6 +4,8 @@ import type {
     SteamAppDetails,
     SteamSearchInput,
     SteamDetailsInput,
+    SteamDLCListInput,
+    SteamDLC,
 } from '../types.js';
 import { Config } from '../config.js';
 
@@ -75,5 +77,70 @@ export async function getSteamGameDetails(input: SteamDetailsInput) {
         release_date: data.release_date,
         is_free: data.is_free,
         supported_languages: data.supported_languages,
+    };
+}
+
+/**
+ * Get a list of DLCs for a specific Steam game
+ */
+export async function getSteamDLCList(input: SteamDLCListInput) {
+    const { appid } = input;
+
+    // 1. Get the list of DLC App IDs from the main game's details
+    const response = await axios.get<{ [key: string]: { success: boolean; data?: any } }>(
+        STEAM_APP_DETAILS_URL,
+        {
+            params: { appids: appid, filters: 'basic' },
+        }
+    );
+
+    const details = response.data[appid];
+    if (!details || !details.success || !details.data) {
+        throw new Error(`Game with App ID ${appid} not found or unavailable`);
+    }
+
+    const dlcIds: number[] = details.data.dlc || [];
+
+    if (dlcIds.length === 0) {
+        return {
+            appid,
+            name: details.data.name,
+            dlc: [],
+            count: 0
+        };
+    }
+
+    // 2. Fetch names for the first 10 DLCs (to be efficient)
+    // Steam public API doesn't support batching well for names
+    const dlcResults: SteamDLC[] = [];
+    const limit = Math.min(dlcIds.length, 10);
+
+    for (let i = 0; i < limit; i++) {
+        const dlcId = dlcIds[i];
+        try {
+            const dlcResponse = await axios.get<{ [key: string]: { success: boolean; data?: any } }>(
+                STEAM_APP_DETAILS_URL,
+                {
+                    params: { appids: dlcId, filters: 'basic' },
+                }
+            );
+            if (dlcResponse.data[dlcId]?.success) {
+                dlcResults.push({
+                    appid: dlcId,
+                    name: dlcResponse.data[dlcId].data.name
+                });
+            }
+        } catch (error) {
+            console.error(`Failed to fetch details for DLC ${dlcId}:`, error);
+        }
+    }
+
+    return {
+        appid,
+        name: details.data.name,
+        dlc: dlcResults,
+        total_dlc_count: dlcIds.length,
+        retrieved_count: dlcResults.length,
+        remaining_count: Math.max(0, dlcIds.length - limit)
     };
 }

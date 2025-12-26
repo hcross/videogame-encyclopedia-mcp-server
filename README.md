@@ -14,6 +14,7 @@ A Model Context Protocol (MCP) server that provides structured video game inform
   - Release date
   - Pricing information
   - Developer and publisher details
+- **steam_get_dlc_list**: List all available DLCs for a specific game
 
 ### SteamGridDB Integration
 - **steamgrid_search_game**: Search for games on SteamGridDB
@@ -143,6 +144,20 @@ Search for games on Steam by name.
 ### 2. steam_get_details
 
 Get detailed information about a Steam game.
+
+**Input:**
+- `appid` (number, required): Steam App ID
+
+**Example:**
+```json
+{
+  "appid": 1245620
+}
+```
+
+### 3. steam_get_dlc_list
+
+Get a list of all available DLCs for a specific Steam game.
 
 **Input:**
 - `appid` (number, required): Steam App ID
