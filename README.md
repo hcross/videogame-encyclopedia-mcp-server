@@ -88,7 +88,6 @@ Add this server to your Claude Desktop configuration file:
       "command": "node",
       "args": ["/Users/hoanicross/devel/perso/genai/mcp/game-encyclopedia-mcp-server/dist/index.js"],
       "env": {
-        "STEAM_API_KEY": "your_steam_api_key_here",
         "STEAMGRIDDB_API_KEY": "your_steamgriddb_api_key_here"
       }
     }
@@ -212,12 +211,11 @@ game-encyclopedia-mcp-server/
 
 Make sure you've created a `.env` file with valid API keys:
 - Check that `.env` exists in the project root
-- Verify both `STEAM_API_KEY` and `STEAMGRIDDB_API_KEY` are set
+- Verify `STEAMGRIDDB_API_KEY` is set
 - Ensure there are no quotes around the keys in the `.env` file
 
 ### "Game not found" errors
 
-- For Steam: Verify the App ID is correct (use `steam_search_game` first)
 - For SteamGridDB: Ensure the game ID is from SteamGridDB, not Steam
 
 ### No visual assets returned
