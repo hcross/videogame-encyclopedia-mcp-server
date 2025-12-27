@@ -8,7 +8,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { loadConfig } from './config.js';
 import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary, getSteamTopSellers, getSteamTopGames, getSteamGenres, getSteamGameNews, getSteamPlayerCount } from './tools/steam.js';
-import { searchSteamGridGames, getSteamGridAssets } from './tools/steamgrid.js';
+import { searchSteamGridGames, getSteamGridAssets, getBestGameLogo } from './tools/steamgrid.js';
 import { getFullGameProfile } from './tools/unified.js';
 
 // Load configuration
@@ -110,6 +110,23 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                         },
                     },
                     required: ['gameId'],
+                },
+            },
+            {
+                name: 'steamgrid_get_best_logo',
+                description: 'Get the single best transparent logo for a game from SteamGridDB.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        gameId: {
+                            type: 'number',
+                            description: 'SteamGridDB Game ID',
+                        },
+                        appid: {
+                            type: 'number',
+                            description: 'Steam App ID',
+                        },
+                    },
                 },
             },
             {
@@ -252,6 +269,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case 'steam_get_details': {
                 const result = await getSteamGameDetails(args as any);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'steamgrid_get_best_logo': {
+                const result = await getBestGameLogo(args as any, config);
                 return {
                     content: [
                         {
