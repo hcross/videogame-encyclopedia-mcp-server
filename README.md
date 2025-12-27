@@ -230,7 +230,7 @@ Search for games on SteamGridDB.
 }
 ```
 
-### 6. steamgrid_get_assets
+### 8. steamgrid_get_assets
 
 Get visual assets for a game from SteamGridDB.
 
@@ -246,7 +246,7 @@ Get visual assets for a game from SteamGridDB.
 }
 ```
 
-### 7. game_get_full_profile
+### 9. game_get_full_profile
 
 Get a comprehensive game profile combining metadata from Steam and visual assets from SteamGridDB. This tool automatically handles the mapping between Steam and SteamGridDB.
 
