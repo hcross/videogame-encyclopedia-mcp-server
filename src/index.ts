@@ -7,7 +7,7 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { loadConfig } from './config.js';
-import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary, getSteamTopSellers, getSteamTopGames } from './tools/steam.js';
+import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary, getSteamTopSellers, getSteamTopGames, getSteamGenres } from './tools/steam.js';
 import { searchSteamGridGames, getSteamGridAssets } from './tools/steamgrid.js';
 import { getFullGameProfile } from './tools/unified.js';
 
@@ -143,6 +143,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 },
             },
             {
+                name: 'steam_get_genres',
+                description: 'Get a list of common Steam genres and categories for discovery.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {},
+                },
+            },
+            {
                 name: 'steam_get_top_sellers',
                 description: 'Get the current global top selling games on Steam.',
                 inputSchema: {
@@ -236,6 +244,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case 'steam_get_reviews_summary': {
                 const result = await getSteamReviewsSummary(args as any);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'steam_get_genres': {
+                const result = await getSteamGenres();
                 return {
                     content: [
                         {

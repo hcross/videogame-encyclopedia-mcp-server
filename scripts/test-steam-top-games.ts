@@ -1,4 +1,4 @@
-import { getSteamTopSellers, getSteamTopGames } from '../src/tools/steam.js';
+import { getSteamTopSellers, getSteamTopGames, getSteamGenres } from '../src/tools/steam.js';
 
 async function testTopGames() {
     console.log('Testing Steam Top Games Explorer Tools...');
@@ -39,6 +39,16 @@ async function testTopGames() {
         });
     } catch (error: any) {
         console.error('Top Games failed:', error.message);
+    }
+
+    // Test 4: Available Genres
+    try {
+        console.log('\nFetching Available Genres...');
+        const result = await getSteamGenres();
+        console.log(`Count: ${result.count}`);
+        console.log('Genres:', result.genres.map(g => g.name).join(', '));
+    } catch (error: any) {
+        console.error('Genres failed:', error.message);
     }
 }
 

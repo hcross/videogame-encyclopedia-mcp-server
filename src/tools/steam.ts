@@ -251,3 +251,31 @@ export async function getSteamTopGames(input: SteamTopGamesInput) {
         results: matches,
     };
 }
+
+/**
+ * Get a list of common Steam genres and categories for discovery
+ */
+export async function getSteamGenres() {
+    // Current curated list of standard Steam genres and tags
+    const genres = [
+        { id: 'Action', name: 'Action' },
+        { id: 'RPG', name: 'RPG' },
+        { id: 'Strategy', name: 'Strategy' },
+        { id: 'Adventure', name: 'Adventure' },
+        { id: 'Simulation', name: 'Simulation' },
+        { id: 'Indie', name: 'Indie' },
+        { id: 'Casual', name: 'Casual' },
+        { id: 'Sports', name: 'Sports' },
+        { id: 'Racing', name: 'Racing' },
+        { id: 'Multiplayer', name: 'Multiplayer' },
+        { id: 'Horror', name: 'Horror' },
+        { id: 'Anime', name: 'Anime' },
+        { id: 'Survival', name: 'Survival' },
+        { id: 'Stealth', name: 'Stealth' }
+    ];
+
+    return {
+        count: genres.length,
+        genres
+    };
+}
