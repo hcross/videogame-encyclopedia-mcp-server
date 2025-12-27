@@ -111,6 +111,15 @@ export interface SteamGridAssetsInput {
     gameId: number;
     assetTypes?: ('grid' | 'hero' | 'logo' | 'icon')[];
 }
+
+export interface SteamDLCListInput {
+    appid: number;
+}
+
+export interface SteamDLC {
+    appid: number;
+    name: string;
+}
 // Unified Tool Types
 export interface UnifiedSearchInput {
     query: string;
