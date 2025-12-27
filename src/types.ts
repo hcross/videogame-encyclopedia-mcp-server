@@ -92,6 +92,30 @@ export interface SteamGridAssetsResponse {
     data: SteamGridAsset[];
 }
 
+export interface SteamGridLogoAsset extends SteamGridAsset {
+    id: number;
+    score: number;
+    style: string;
+    width: number;
+    height: number;
+    nsfw: boolean;
+    humor: boolean;
+    notes: string | null;
+    mime: string;
+    language: string;
+    url: string;
+    thumb: string;
+    lock: boolean;
+    epilepsy: boolean;
+    upvotes: number;
+    downvotes: number;
+    author: {
+        name: string;
+        steam64: string;
+        avatar: string;
+    };
+}
+
 // MCP Tool Input Schemas
 export interface SteamSearchInput {
     query: string;
@@ -110,6 +134,11 @@ export interface SteamGridSearchInput {
 export interface SteamGridAssetsInput {
     gameId: number;
     assetTypes?: ('grid' | 'hero' | 'logo' | 'icon')[];
+}
+
+export interface SteamGridBestLogoInput {
+    gameId?: number;
+    appid?: number;
 }
 
 export interface SteamDLCListInput {

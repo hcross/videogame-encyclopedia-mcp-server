@@ -30,6 +30,7 @@ A Model Context Protocol (MCP) server that provides structured video game inform
   - Hero/banner images
   - Icons
   - Multiple variations with metadata (dimensions, MIME type, author)
+- **steamgrid_get_best_logo**: Get the single best transparent logo for a game
 
 ### Unified Tools
 - **game_get_full_profile**: Get a comprehensive game profile in a single request, aggregating metadata from Steam and community visual assets from SteamGridDB. This is the **recommended tool** for providing a complete overview of a game.
@@ -288,7 +289,22 @@ Get visual assets for a game from SteamGridDB.
 }
 ```
 
-### 12. game_get_full_profile
+### 12. steamgrid_get_best_logo
+
+Get the single best transparent logo for a game from SteamGridDB, optimized for UI use.
+
+**Input:**
+- `gameId` (number, optional): SteamGridDB Game ID
+- `appid` (number, optional): Steam App ID
+
+**Example:**
+```json
+{
+  "appid": 1245620
+}
+```
+
+### 13. game_get_full_profile
 
 Get a comprehensive game profile combining metadata from Steam and visual assets from SteamGridDB. This tool automatically handles the mapping between Steam and SteamGridDB.
 
