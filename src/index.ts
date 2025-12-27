@@ -7,7 +7,7 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { loadConfig } from './config.js';
-import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary } from './tools/steam.js';
+import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary, getSteamTopSellers, getSteamTopGames, getSteamGenres } from './tools/steam.js';
 import { searchSteamGridGames, getSteamGridAssets } from './tools/steamgrid.js';
 import { getFullGameProfile } from './tools/unified.js';
 
@@ -143,6 +143,45 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 },
             },
             {
+                name: 'steam_get_genres',
+                description: 'Get a list of common Steam genres and categories for discovery.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {},
+                },
+            },
+            {
+                name: 'steam_get_top_sellers',
+                description: 'Get the current global top selling games on Steam.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        limit: {
+                            type: 'number',
+                            description: 'Maximum results to return (default: 10)',
+                        },
+                    },
+                },
+            },
+            {
+                name: 'steam_get_top_games',
+                description:
+                    'Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", "Strategy").',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        genreId: {
+                            type: 'string',
+                            description: 'The name or ID of the genre to browse',
+                        },
+                        limit: {
+                            type: 'number',
+                            description: 'Maximum results to return (default: 10)',
+                        },
+                    },
+                },
+            },
+            {
                 name: 'game_get_full_profile',
                 description:
                     'Get a comprehensive game profile including metadata from Steam and visual assets (logo, hero, grid, icon) from SteamGridDB in a single request. This is the recommended tool for getting a complete overview of a game.',
@@ -205,6 +244,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case 'steam_get_reviews_summary': {
                 const result = await getSteamReviewsSummary(args as any);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'steam_get_genres': {
+                const result = await getSteamGenres();
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'steam_get_top_sellers': {
+                const result = await getSteamTopSellers(args as any);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'steam_get_top_games': {
+                const result = await getSteamTopGames(args as any);
                 return {
                     content: [
                         {

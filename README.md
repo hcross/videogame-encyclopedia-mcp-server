@@ -16,6 +16,9 @@ A Model Context Protocol (MCP) server that provides structured video game inform
   - Developer and publisher details
 - **steam_get_dlc_list**: List all available DLCs for a specific game
 - **steam_get_reviews_summary**: Get community ratings and top review snippets
+- **steam_get_top_sellers**: Get current global top selling games
+- **steam_get_top_games**: Browse top games by genre or category
+- **steam_get_genres**: Get a list of common Steam genres for discovery
 
 ### SteamGridDB Integration
 - **steamgrid_search_game**: Search for games on SteamGridDB
@@ -184,7 +187,46 @@ Get a summary of user reviews and ratings for a specific Steam game.
 }
 ```
 
-### 5. steamgrid_search_game
+### 5. steam_get_genres
+
+Get a list of common Steam genres and categories for discovery.
+
+**Example:**
+```json
+{}
+```
+
+### 6. steam_get_top_sellers
+
+Get the current global top selling games on Steam.
+
+**Input:**
+- `limit` (number, optional): Maximum results (default: 10)
+
+**Example:**
+```json
+{
+  "limit": 5
+}
+```
+
+### 7. steam_get_top_games
+
+Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", "Strategy").
+
+**Input:**
+- `genreId` (string, optional): Genre name to browse
+- `limit` (number, optional): Maximum results (default: 10)
+
+**Example:**
+```json
+{
+  "genreId": "RPG",
+  "limit": 5
+}
+```
+
+### 8. steamgrid_search_game
 
 Search for games on SteamGridDB.
 
@@ -198,7 +240,7 @@ Search for games on SteamGridDB.
 }
 ```
 
-### 6. steamgrid_get_assets
+### 9. steamgrid_get_assets
 
 Get visual assets for a game from SteamGridDB.
 
@@ -214,7 +256,7 @@ Get visual assets for a game from SteamGridDB.
 }
 ```
 
-### 7. game_get_full_profile
+### 10. game_get_full_profile
 
 Get a comprehensive game profile combining metadata from Steam and visual assets from SteamGridDB. This tool automatically handles the mapping between Steam and SteamGridDB.
 
