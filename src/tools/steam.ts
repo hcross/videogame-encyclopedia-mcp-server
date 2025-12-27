@@ -10,16 +10,17 @@ import type {
     SteamReviewsSummary,
     SteamReview,
     SteamTopGamesInput,
+    SteamNewsInput,
+    SteamNewsResponse,
+    SteamNewsItem,
 } from '../types.js';
 import { Config } from '../config.js';
 
 const STORE_SEARCH_URL = 'https://store.steampowered.com/api/storesearch/';
 const STEAM_APP_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
 const STEAM_REVIEWS_URL = 'https://store.steampowered.com/appreviews/';
+const STEAM_NEWS_URL = 'https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/';
 
-/**
- * Search for games on Steam by name using the public Store Search API
- */
 export async function searchSteamGames(input: SteamSearchInput) {
     const { query, limit = 10 } = input;
 
@@ -277,5 +278,44 @@ export async function getSteamGenres() {
     return {
         count: genres.length,
         genres
+    };
+}
+
+/**
+ * Get the latest news and announcements for a specific Steam game
+ */
+export async function getSteamGameNews(input: SteamNewsInput) {
+    const { appid, count = 5 } = input;
+
+    const response = await axios.get<{ appnews: SteamNewsResponse }>(STEAM_NEWS_URL, {
+        params: {
+            appid,
+            count,
+            maxlength: 300,
+            format: 'json'
+        },
+    });
+
+    const appnews = response.data.appnews;
+
+    if (!appnews || !appnews.newsitems) {
+        throw new Error(`Failed to retrieve news for App ID ${appid}`);
+    }
+
+    const newsItems = appnews.newsitems.map(item => ({
+        gid: item.gid,
+        title: item.title,
+        url: item.url,
+        author: item.author,
+        contents: item.contents,
+        feedlabel: item.feedlabel,
+        date: new Date(item.date * 1000).toISOString(),
+        feedname: item.feedname
+    }));
+
+    return {
+        appid: appnews.appid,
+        count: newsItems.length,
+        news: newsItems
     };
 }

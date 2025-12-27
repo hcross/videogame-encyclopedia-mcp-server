@@ -148,6 +148,28 @@ export interface SteamTopGamesInput {
     genreId?: string;
     limit?: number;
 }
+
+export interface SteamNewsInput {
+    appid: number;
+    count?: number;
+}
+
+export interface SteamNewsItem {
+    gid: string;
+    title: string;
+    url: string;
+    author: string;
+    contents: string;
+    feedlabel: string;
+    date: number;
+    feedname: string;
+}
+
+export interface SteamNewsResponse {
+    appid: number;
+    newsitems: SteamNewsItem[];
+    count: number;
+}
 // Unified Tool Types
 export interface UnifiedSearchInput {
     query: string;

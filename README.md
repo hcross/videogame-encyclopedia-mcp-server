@@ -16,6 +16,7 @@ A Model Context Protocol (MCP) server that provides structured video game inform
   - Developer and publisher details
 - **steam_get_dlc_list**: List all available DLCs for a specific game
 - **steam_get_reviews_summary**: Get community ratings and top review snippets
+- **steam_get_game_news**: Get the latest news and announcements for a game
 - **steam_get_top_sellers**: Get current global top selling games
 - **steam_get_top_games**: Browse top games by genre or category
 - **steam_get_genres**: Get a list of common Steam genres for discovery
@@ -187,7 +188,23 @@ Get a summary of user reviews and ratings for a specific Steam game.
 }
 ```
 
-### 5. steam_get_genres
+### 5. steam_get_game_news
+
+Get the latest news and announcements for a specific Steam game.
+
+**Input:**
+- `appid` (number, required): Steam App ID of the game
+- `count` (number, optional): Number of news items to fetch (default: 5)
+
+**Example:**
+```json
+{
+  "appid": 1245620,
+  "count": 3
+}
+```
+
+### 6. steam_get_genres
 
 Get a list of common Steam genres and categories for discovery.
 
@@ -196,7 +213,7 @@ Get a list of common Steam genres and categories for discovery.
 {}
 ```
 
-### 6. steam_get_top_sellers
+### 7. steam_get_top_sellers
 
 Get the current global top selling games on Steam.
 
@@ -210,7 +227,7 @@ Get the current global top selling games on Steam.
 }
 ```
 
-### 7. steam_get_top_games
+### 8. steam_get_top_games
 
 Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", "Strategy").
 
@@ -226,7 +243,7 @@ Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", 
 }
 ```
 
-### 8. steamgrid_search_game
+### 9. steamgrid_search_game
 
 Search for games on SteamGridDB.
 
@@ -240,7 +257,7 @@ Search for games on SteamGridDB.
 }
 ```
 
-### 9. steamgrid_get_assets
+### 10. steamgrid_get_assets
 
 Get visual assets for a game from SteamGridDB.
 
@@ -256,7 +273,7 @@ Get visual assets for a game from SteamGridDB.
 }
 ```
 
-### 10. game_get_full_profile
+### 11. game_get_full_profile
 
 Get a comprehensive game profile combining metadata from Steam and visual assets from SteamGridDB. This tool automatically handles the mapping between Steam and SteamGridDB.
 
