@@ -120,6 +120,29 @@ export interface SteamDLC {
     appid: number;
     name: string;
 }
+
+export interface SteamReviewsSummaryInput {
+    appid: number;
+}
+
+export interface SteamReview {
+    recommendationid: string;
+    review: string;
+    voted_up: boolean;
+    votes_up: number;
+    weighted_vote_score: string;
+}
+
+export interface SteamReviewsSummary {
+    appid: number;
+    review_score: number;
+    review_score_desc: string;
+    total_positive: number;
+    total_negative: number;
+    total_reviews: number;
+    percentage_score: number;
+    top_reviews: string[];
+}
 // Unified Tool Types
 export interface UnifiedSearchInput {
     query: string;

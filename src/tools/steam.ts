@@ -6,11 +6,15 @@ import type {
     SteamDetailsInput,
     SteamDLCListInput,
     SteamDLC,
+    SteamReviewsSummaryInput,
+    SteamReviewsSummary,
+    SteamReview,
 } from '../types.js';
 import { Config } from '../config.js';
 
 const STORE_SEARCH_URL = 'https://store.steampowered.com/api/storesearch/';
 const STEAM_APP_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
+const STEAM_REVIEWS_URL = 'https://store.steampowered.com/appreviews/';
 
 /**
  * Search for games on Steam by name using the public Store Search API
@@ -142,5 +146,49 @@ export async function getSteamDLCList(input: SteamDLCListInput) {
         total_dlc_count: dlcIds.length,
         retrieved_count: dlcResults.length,
         remaining_count: Math.max(0, dlcIds.length - limit)
+    };
+}
+
+/**
+ * Get a summary of user reviews for a specific Steam game
+ */
+export async function getSteamReviewsSummary(input: SteamReviewsSummaryInput): Promise<SteamReviewsSummary> {
+    const { appid } = input;
+
+    const response = await axios.get(`${STEAM_REVIEWS_URL}${appid}`, {
+        params: {
+            json: 1,
+            language: 'all',
+            num_per_page: 5,
+            filter: 'all',
+        },
+    });
+
+    const data = response.data;
+    const summary = data.query_summary;
+
+    if (!summary) {
+        throw new Error(`Failed to retrieve review summary for App ID ${appid}`);
+    }
+
+    const percentageScore = summary.total_reviews > 0
+        ? Math.round((summary.total_positive / summary.total_reviews) * 100)
+        : 0;
+
+    // Filter and clean review text for top reviews
+    const topReviews = data.reviews
+        .map((r: SteamReview) => r.review.trim())
+        .filter((text: string) => text.length > 10) // Filter out very short reviews
+        .slice(0, 5);
+
+    return {
+        appid,
+        review_score: summary.review_score,
+        review_score_desc: summary.review_score_desc,
+        total_positive: summary.total_positive,
+        total_negative: summary.total_negative,
+        total_reviews: summary.total_reviews,
+        percentage_score: percentageScore,
+        top_reviews: topReviews,
     };
 }

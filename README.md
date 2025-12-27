@@ -15,6 +15,7 @@ A Model Context Protocol (MCP) server that provides structured video game inform
   - Pricing information
   - Developer and publisher details
 - **steam_get_dlc_list**: List all available DLCs for a specific game
+- **steam_get_reviews_summary**: Get community ratings and top review snippets
 
 ### SteamGridDB Integration
 - **steamgrid_search_game**: Search for games on SteamGridDB
@@ -169,7 +170,21 @@ Get a list of all available DLCs for a specific Steam game.
 }
 ```
 
-### 3. steamgrid_search_game
+### 4. steam_get_reviews_summary
+
+Get a summary of user reviews and ratings for a specific Steam game.
+
+**Input:**
+- `appid` (number, required): Steam App ID
+
+**Example:**
+```json
+{
+  "appid": 1245620
+}
+```
+
+### 5. steamgrid_search_game
 
 Search for games on SteamGridDB.
 
@@ -183,7 +198,7 @@ Search for games on SteamGridDB.
 }
 ```
 
-### 4. steamgrid_get_assets
+### 6. steamgrid_get_assets
 
 Get visual assets for a game from SteamGridDB.
 
@@ -199,7 +214,7 @@ Get visual assets for a game from SteamGridDB.
 }
 ```
 
-### 5. game_get_full_profile
+### 7. game_get_full_profile
 
 Get a comprehensive game profile combining metadata from Steam and visual assets from SteamGridDB. This tool automatically handles the mapping between Steam and SteamGridDB.
 
