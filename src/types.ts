@@ -170,6 +170,15 @@ export interface SteamNewsResponse {
     newsitems: SteamNewsItem[];
     count: number;
 }
+
+export interface SteamPlayerCountInput {
+    appid: number;
+}
+
+export interface SteamPlayerCountResponse {
+    player_count: number;
+    result: number;
+}
 // Unified Tool Types
 export interface UnifiedSearchInput {
     query: string;

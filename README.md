@@ -17,6 +17,7 @@ A Model Context Protocol (MCP) server that provides structured video game inform
 - **steam_get_dlc_list**: List all available DLCs for a specific game
 - **steam_get_reviews_summary**: Get community ratings and top review snippets
 - **steam_get_game_news**: Get the latest news and announcements for a game
+- **steam_get_player_count**: Get the current number of online players for a game
 - **steam_get_top_sellers**: Get current global top selling games
 - **steam_get_top_games**: Browse top games by genre or category
 - **steam_get_genres**: Get a list of common Steam genres for discovery
@@ -204,7 +205,21 @@ Get the latest news and announcements for a specific Steam game.
 }
 ```
 
-### 6. steam_get_genres
+### 6. steam_get_player_count
+
+Get the current number of players online for a specific Steam game.
+
+**Input:**
+- `appid` (number, required): Steam App ID of the game
+
+**Example:**
+```json
+{
+  "appid": 1245620
+}
+```
+
+### 7. steam_get_genres
 
 Get a list of common Steam genres and categories for discovery.
 
@@ -213,7 +228,7 @@ Get a list of common Steam genres and categories for discovery.
 {}
 ```
 
-### 7. steam_get_top_sellers
+### 8. steam_get_top_sellers
 
 Get the current global top selling games on Steam.
 
@@ -227,7 +242,7 @@ Get the current global top selling games on Steam.
 }
 ```
 
-### 8. steam_get_top_games
+### 9. steam_get_top_games
 
 Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", "Strategy").
 
@@ -243,7 +258,7 @@ Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", 
 }
 ```
 
-### 9. steamgrid_search_game
+### 10. steamgrid_search_game
 
 Search for games on SteamGridDB.
 
@@ -257,7 +272,7 @@ Search for games on SteamGridDB.
 }
 ```
 
-### 10. steamgrid_get_assets
+### 11. steamgrid_get_assets
 
 Get visual assets for a game from SteamGridDB.
 
@@ -273,7 +288,7 @@ Get visual assets for a game from SteamGridDB.
 }
 ```
 
-### 11. game_get_full_profile
+### 12. game_get_full_profile
 
 Get a comprehensive game profile combining metadata from Steam and visual assets from SteamGridDB. This tool automatically handles the mapping between Steam and SteamGridDB.
 

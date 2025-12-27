@@ -7,7 +7,7 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { loadConfig } from './config.js';
-import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary, getSteamTopSellers, getSteamTopGames, getSteamGenres, getSteamGameNews } from './tools/steam.js';
+import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary, getSteamTopSellers, getSteamTopGames, getSteamGenres, getSteamGameNews, getSteamPlayerCount } from './tools/steam.js';
 import { searchSteamGridGames, getSteamGridAssets } from './tools/steamgrid.js';
 import { getFullGameProfile } from './tools/unified.js';
 
@@ -161,6 +161,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 },
             },
             {
+                name: 'steam_get_player_count',
+                description: 'Get the current number of players online for a specific Steam game.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        appid: {
+                            type: 'number',
+                            description: 'Steam App ID of the game',
+                        },
+                    },
+                    required: ['appid'],
+                },
+            },
+            {
                 name: 'steam_get_genres',
                 description: 'Get a list of common Steam genres and categories for discovery.',
                 inputSchema: {
@@ -274,6 +288,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case 'steam_get_game_news': {
                 const result = await getSteamGameNews(args as any);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'steam_get_player_count': {
+                const result = await getSteamPlayerCount(args as any);
                 return {
                     content: [
                         {
