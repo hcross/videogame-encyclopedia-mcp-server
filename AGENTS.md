@@ -16,7 +16,9 @@ All Steam tools use public web endpoints to avoid the need for a Steam API Key:
 - Search: `store.steampowered.com/api/storesearch/`
 - Details: `store.steampowered.com/api/appdetails`
 - Reviews: `store.steampowered.com/appreviews/`
-- Featured: `store.steampowered.com/api/featuredcategories/`
+- News: `api.steampowered.com/ISteamNews/GetNewsForApp/v0002/`
+- Player Count: `api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/`
+- Featured/Top Sellers: `store.steampowered.com/api/featuredcategories/`
 
 ### Asset Retrieval (SteamGridDB)
 - Always map Steam App ID to SteamGridDB Game ID using `getSteamGridGameBySteamId` before fetching assets.
