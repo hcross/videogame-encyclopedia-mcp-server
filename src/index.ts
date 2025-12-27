@@ -7,7 +7,7 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { loadConfig } from './config.js';
-import { searchSteamGames, getSteamGameDetails, getSteamDLCList } from './tools/steam.js';
+import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary } from './tools/steam.js';
 import { searchSteamGridGames, getSteamGridAssets } from './tools/steamgrid.js';
 import { getFullGameProfile } from './tools/unified.js';
 
@@ -128,6 +128,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 },
             },
             {
+                name: 'steam_get_reviews_summary',
+                description:
+                    'Get a summary of user reviews and ratings for a specific Steam game by its App ID. Includes overall score and top review snippets.',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        appid: {
+                            type: 'number',
+                            description: 'The Steam App ID of the game',
+                        },
+                    },
+                    required: ['appid'],
+                },
+            },
+            {
                 name: 'game_get_full_profile',
                 description:
                     'Get a comprehensive game profile including metadata from Steam and visual assets (logo, hero, grid, icon) from SteamGridDB in a single request. This is the recommended tool for getting a complete overview of a game.',
@@ -178,6 +193,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
             case 'steam_get_dlc_list': {
                 const result = await getSteamDLCList(args as any);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            case 'steam_get_reviews_summary': {
+                const result = await getSteamReviewsSummary(args as any);
                 return {
                     content: [
                         {
