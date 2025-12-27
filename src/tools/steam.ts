@@ -13,6 +13,8 @@ import type {
     SteamNewsInput,
     SteamNewsResponse,
     SteamNewsItem,
+    SteamPlayerCountInput,
+    SteamPlayerCountResponse,
 } from '../types.js';
 import { Config } from '../config.js';
 
@@ -20,6 +22,7 @@ const STORE_SEARCH_URL = 'https://store.steampowered.com/api/storesearch/';
 const STEAM_APP_DETAILS_URL = 'https://store.steampowered.com/api/appdetails';
 const STEAM_REVIEWS_URL = 'https://store.steampowered.com/appreviews/';
 const STEAM_NEWS_URL = 'https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/';
+const STEAM_PLAYER_COUNT_URL = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/';
 
 export async function searchSteamGames(input: SteamSearchInput) {
     const { query, limit = 10 } = input;
@@ -317,5 +320,29 @@ export async function getSteamGameNews(input: SteamNewsInput) {
         appid: appnews.appid,
         count: newsItems.length,
         news: newsItems
+    };
+}
+
+/**
+ * Get the current number of players online for a specific Steam game
+ */
+export async function getSteamPlayerCount(input: SteamPlayerCountInput) {
+    const { appid } = input;
+
+    const response = await axios.get<{ response: SteamPlayerCountResponse }>(STEAM_PLAYER_COUNT_URL, {
+        params: {
+            appid,
+        },
+    });
+
+    const data = response.data.response;
+
+    if (data.result !== 1) {
+        throw new Error(`Failed to retrieve player count for App ID ${appid}`);
+    }
+
+    return {
+        appid,
+        player_count: data.player_count,
     };
 }
