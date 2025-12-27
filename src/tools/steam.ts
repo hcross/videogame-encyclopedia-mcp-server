@@ -9,6 +9,7 @@ import type {
     SteamReviewsSummaryInput,
     SteamReviewsSummary,
     SteamReview,
+    SteamTopGamesInput,
 } from '../types.js';
 import { Config } from '../config.js';
 
@@ -190,5 +191,63 @@ export async function getSteamReviewsSummary(input: SteamReviewsSummaryInput): P
         total_reviews: summary.total_reviews,
         percentage_score: percentageScore,
         top_reviews: topReviews,
+    };
+}
+
+/**
+ * Get the current global top selling games on Steam
+ */
+export async function getSteamTopSellers(input: { limit?: number }) {
+    const { limit = 10 } = input;
+
+    const response = await axios.get('https://store.steampowered.com/api/featuredcategories/');
+    const data = response.data;
+
+    if (!data.top_sellers || !data.top_sellers.items) {
+        throw new Error('Failed to retrieve top sellers data from Steam');
+    }
+
+    const items = data.top_sellers.items.slice(0, limit).map((item: any) => ({
+        appid: item.id,
+        name: item.name,
+        original_price: item.original_price,
+        final_price: item.final_price,
+        currency: item.currency,
+        discount_percent: item.discount_percent,
+        header_image: item.header_image,
+    }));
+
+    return {
+        count: items.length,
+        results: items,
+    };
+}
+
+/**
+ * Browse top games for a specific Steam category or genre
+ */
+export async function getSteamTopGames(input: SteamTopGamesInput) {
+    const { genreId, limit = 10 } = input;
+
+    // We use the storesearch API as it's the most reliable public way to find games by genre/keyword
+    const response = await axios.get<SteamStoreSearchResponse>(STORE_SEARCH_URL, {
+        params: {
+            term: genreId || '',
+            l: 'english',
+            cc: 'US'
+        }
+    });
+
+    const matches = response.data.items.slice(0, limit).map(item => ({
+        appid: item.id,
+        name: item.name,
+        price: item.price,
+        platforms: item.platforms,
+    }));
+
+    return {
+        genre: genreId || 'All',
+        count: matches.length,
+        results: matches,
     };
 }

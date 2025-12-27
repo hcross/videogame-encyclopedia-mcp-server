@@ -143,6 +143,11 @@ export interface SteamReviewsSummary {
     percentage_score: number;
     top_reviews: string[];
 }
+
+export interface SteamTopGamesInput {
+    genreId?: string;
+    limit?: number;
+}
 // Unified Tool Types
 export interface UnifiedSearchInput {
     query: string;

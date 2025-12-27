@@ -16,6 +16,8 @@ A Model Context Protocol (MCP) server that provides structured video game inform
   - Developer and publisher details
 - **steam_get_dlc_list**: List all available DLCs for a specific game
 - **steam_get_reviews_summary**: Get community ratings and top review snippets
+- **steam_get_top_sellers**: Get current global top selling games
+- **steam_get_top_games**: Browse top games by genre or category
 
 ### SteamGridDB Integration
 - **steamgrid_search_game**: Search for games on SteamGridDB
@@ -184,7 +186,37 @@ Get a summary of user reviews and ratings for a specific Steam game.
 }
 ```
 
-### 5. steamgrid_search_game
+### 5. steam_get_top_sellers
+
+Get the current global top selling games on Steam.
+
+**Input:**
+- `limit` (number, optional): Maximum results (default: 10)
+
+**Example:**
+```json
+{
+  "limit": 5
+}
+```
+
+### 6. steam_get_top_games
+
+Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", "Strategy").
+
+**Input:**
+- `genreId` (string, optional): Genre name to browse
+- `limit` (number, optional): Maximum results (default: 10)
+
+**Example:**
+```json
+{
+  "genreId": "RPG",
+  "limit": 5
+}
+```
+
+### 7. steamgrid_search_game
 
 Search for games on SteamGridDB.
 
