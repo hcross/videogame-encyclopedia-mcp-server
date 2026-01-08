@@ -1,442 +1,582 @@
 #!/usr/bin/env node
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
-    CallToolRequestSchema,
-    ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import { loadConfig } from './config.js';
-import { searchSteamGames, getSteamGameDetails, getSteamDLCList, getSteamReviewsSummary, getSteamTopSellers, getSteamTopGames, getSteamGenres, getSteamGameNews, getSteamPlayerCount } from './tools/steam.js';
-import { searchSteamGridGames, getSteamGridAssets, getBestGameLogo } from './tools/steamgrid.js';
-import { getFullGameProfile } from './tools/unified.js';
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
+import { loadConfig } from "./config.js";
+import {
+  searchSteamGames,
+  getSteamGameDetails,
+  getSteamDLCList,
+  getSteamReviewsSummary,
+  getSteamTopSellers,
+  getSteamTopGames,
+  getSteamGenres,
+  getSteamGameNews,
+  getSteamPlayerCount,
+} from "./tools/steam.js";
+import {
+  searchSteamGridGames,
+  getSteamGridAssets,
+  getBestGameLogo,
+} from "./tools/steamgrid.js";
+import { getFullGameProfile } from "./tools/unified.js";
+import {
+  getScreenScraperSystems,
+  searchScreenScraperGames,
+  getScreenScraperGameInfo,
+} from "./tools/screenscraper.js";
 
 // Load configuration
 let config;
 try {
-    config = loadConfig();
+  config = loadConfig();
 } catch (error) {
-    console.error('Configuration error:', error);
-    process.exit(1);
+  console.error("Configuration error:", error);
+  process.exit(1);
 }
 
 // Create MCP server
 const server = new Server(
-    {
-        name: 'game-encyclopedia-mcp-server',
-        version: '1.0.0',
+  {
+    name: "game-encyclopedia-mcp-server",
+    version: "1.0.0",
+  },
+  {
+    capabilities: {
+      tools: {},
     },
-    {
-        capabilities: {
-            tools: {},
-        },
-    }
+  },
 );
 
 // Register tool list handler
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-    return {
-        tools: [
-            {
-                name: 'steam_search_game',
-                description:
-                    'Search for video games on Steam by name. Returns a list of matching games with their App IDs.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        query: {
-                            type: 'string',
-                            description: 'The game name to search for',
-                        },
-                        limit: {
-                            type: 'number',
-                            description: 'Maximum number of results to return (default: 10)',
-                            default: 10,
-                        },
-                    },
-                    required: ['query'],
-                },
+  return {
+    tools: [
+      {
+        name: "steam_search_game",
+        description:
+          "Search for video games on Steam by name. Returns a list of matching games with their App IDs.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "The game name to search for",
             },
-            {
-                name: 'steam_get_details',
-                description:
-                    'Get detailed information about a Steam game by its App ID. Returns comprehensive metadata including description, categories, genres, supported players, release date, price, and more.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        appid: {
-                            type: 'number',
-                            description: 'The Steam App ID of the game',
-                        },
-                    },
-                    required: ['appid'],
-                },
+            limit: {
+              type: "number",
+              description: "Maximum number of results to return (default: 10)",
+              default: 10,
             },
-            {
-                name: 'steamgrid_search_game',
-                description:
-                    'Search for video games on SteamGridDB by name. Returns a list of matching games with their SteamGridDB IDs, which can be used to retrieve visual assets.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        query: {
-                            type: 'string',
-                            description: 'The game name to search for',
-                        },
-                    },
-                    required: ['query'],
-                },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "steam_get_details",
+        description:
+          "Get detailed information about a Steam game by its App ID. Returns comprehensive metadata including description, categories, genres, supported players, release date, price, and more.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            appid: {
+              type: "number",
+              description: "The Steam App ID of the game",
             },
-            {
-                name: 'steamgrid_get_assets',
-                description:
-                    'Get visual assets for a game from SteamGridDB. Returns URLs for various asset types including transparent logos, boxart/grids, hero images, and icons.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        gameId: {
-                            type: 'number',
-                            description: 'The SteamGridDB game ID',
-                        },
-                        assetTypes: {
-                            type: 'array',
-                            items: {
-                                type: 'string',
-                                enum: ['grid', 'hero', 'logo', 'icon'],
-                            },
-                            description:
-                                'Types of assets to retrieve (default: all types)',
-                            default: ['grid', 'hero', 'logo', 'icon'],
-                        },
-                    },
-                    required: ['gameId'],
-                },
+          },
+          required: ["appid"],
+        },
+      },
+      {
+        name: "steamgrid_search_game",
+        description:
+          "Search for video games on SteamGridDB by name. Returns a list of matching games with their SteamGridDB IDs, which can be used to retrieve visual assets.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "The game name to search for",
             },
-            {
-                name: 'steamgrid_get_best_logo',
-                description: 'Get the single best transparent logo for a game from SteamGridDB.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        gameId: {
-                            type: 'number',
-                            description: 'SteamGridDB Game ID',
-                        },
-                        appid: {
-                            type: 'number',
-                            description: 'Steam App ID',
-                        },
-                    },
-                },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "steamgrid_get_assets",
+        description:
+          "Get visual assets for a game from SteamGridDB. Returns URLs for various asset types including transparent logos, boxart/grids, hero images, and icons.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            gameId: {
+              type: "number",
+              description: "The SteamGridDB game ID",
             },
-            {
-                name: 'steam_get_dlc_list',
-                description:
-                    'Get a list of all available DLCs for a specific Steam game by its App ID. Returns the App ID and name for each DLC.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        appid: {
-                            type: 'number',
-                            description: 'The Steam App ID of the main game',
-                        },
-                    },
-                    required: ['appid'],
-                },
+            assetTypes: {
+              type: "array",
+              items: {
+                type: "string",
+                enum: ["grid", "hero", "logo", "icon"],
+              },
+              description: "Types of assets to retrieve (default: all types)",
+              default: ["grid", "hero", "logo", "icon"],
             },
-            {
-                name: 'steam_get_reviews_summary',
-                description:
-                    'Get a summary of user reviews and ratings for a specific Steam game by its App ID. Includes overall score and top review snippets.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        appid: {
-                            type: 'number',
-                            description: 'The Steam App ID of the game',
-                        },
-                    },
-                    required: ['appid'],
-                },
+          },
+          required: ["gameId"],
+        },
+      },
+      {
+        name: "steamgrid_get_best_logo",
+        description:
+          "Get the single best transparent logo for a game from SteamGridDB.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            gameId: {
+              type: "number",
+              description: "SteamGridDB Game ID",
             },
-            {
-                name: 'steam_get_game_news',
-                description: 'Get the latest news and announcements for a specific Steam game.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        appid: {
-                            type: 'number',
-                            description: 'Steam App ID of the game',
-                        },
-                        count: {
-                            type: 'number',
-                            description: 'Number of news items to fetch (default: 5)',
-                        },
-                    },
-                    required: ['appid'],
-                },
+            appid: {
+              type: "number",
+              description: "Steam App ID",
             },
-            {
-                name: 'steam_get_player_count',
-                description: 'Get the current number of players online for a specific Steam game.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        appid: {
-                            type: 'number',
-                            description: 'Steam App ID of the game',
-                        },
-                    },
-                    required: ['appid'],
-                },
+          },
+        },
+      },
+      {
+        name: "steam_get_dlc_list",
+        description:
+          "Get a list of all available DLCs for a specific Steam game by its App ID. Returns the App ID and name for each DLC.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            appid: {
+              type: "number",
+              description: "The Steam App ID of the main game",
             },
-            {
-                name: 'steam_get_genres',
-                description: 'Get a list of common Steam genres and categories for discovery.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {},
-                },
+          },
+          required: ["appid"],
+        },
+      },
+      {
+        name: "steam_get_reviews_summary",
+        description:
+          "Get a summary of user reviews and ratings for a specific Steam game by its App ID. Includes overall score and top review snippets.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            appid: {
+              type: "number",
+              description: "The Steam App ID of the game",
             },
-            {
-                name: 'steam_get_top_sellers',
-                description: 'Get the current global top selling games on Steam.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        limit: {
-                            type: 'number',
-                            description: 'Maximum results to return (default: 10)',
-                        },
-                    },
-                },
+          },
+          required: ["appid"],
+        },
+      },
+      {
+        name: "steam_get_game_news",
+        description:
+          "Get the latest news and announcements for a specific Steam game.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            appid: {
+              type: "number",
+              description: "Steam App ID of the game",
             },
-            {
-                name: 'steam_get_top_games',
-                description:
-                    'Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", "Strategy").',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        genreId: {
-                            type: 'string',
-                            description: 'The name or ID of the genre to browse',
-                        },
-                        limit: {
-                            type: 'number',
-                            description: 'Maximum results to return (default: 10)',
-                        },
-                    },
-                },
+            count: {
+              type: "number",
+              description: "Number of news items to fetch (default: 5)",
             },
-            {
-                name: 'game_get_full_profile',
-                description:
-                    'Get a comprehensive game profile including metadata from Steam and visual assets (logo, hero, grid, icon) from SteamGridDB in a single request. This is the recommended tool for getting a complete overview of a game.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        query: {
-                            type: 'string',
-                            description: 'The game name to search for',
-                        },
-                    },
-                    required: ['query'],
-                },
+          },
+          required: ["appid"],
+        },
+      },
+      {
+        name: "steam_get_player_count",
+        description:
+          "Get the current number of players online for a specific Steam game.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            appid: {
+              type: "number",
+              description: "Steam App ID of the game",
             },
-        ],
-    };
+          },
+          required: ["appid"],
+        },
+      },
+      {
+        name: "steam_get_genres",
+        description:
+          "Get a list of common Steam genres and categories for discovery.",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
+      {
+        name: "steam_get_top_sellers",
+        description: "Get the current global top selling games on Steam.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Maximum results to return (default: 10)",
+            },
+          },
+        },
+      },
+      {
+        name: "steam_get_top_games",
+        description:
+          'Browse top games for a specific Steam category or genre (e.g., "Action", "RPG", "Strategy").',
+        inputSchema: {
+          type: "object",
+          properties: {
+            genreId: {
+              type: "string",
+              description: "The name or ID of the genre to browse",
+            },
+            limit: {
+              type: "number",
+              description: "Maximum results to return (default: 10)",
+            },
+          },
+        },
+      },
+      {
+        name: "game_get_full_profile",
+        description:
+          "Get a comprehensive game profile including metadata from Steam and visual assets (logo, hero, grid, icon) from SteamGridDB in a single request. This is the recommended tool for getting a complete overview of a game.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "The game name to search for",
+            },
+          },
+          required: ["query"],
+        },
+      },
+      {
+        name: "screenscraper_get_systems",
+        description:
+          "Get a list of all supported retro gaming systems from ScreenScraper.fr. Returns system IDs, names, manufacturers, and supported file extensions.",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
+      {
+        name: "screenscraper_search_game",
+        description:
+          "Search for retro games on ScreenScraper.fr by name. Optionally filter by gaming system. Returns game information including system, developer, publisher, and genres.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            gameName: {
+              type: "string",
+              description: "The game name to search for",
+            },
+            systemId: {
+              type: "number",
+              description:
+                "Optional: Filter by gaming system ID (use screenscraper_get_systems to find IDs)",
+            },
+            language: {
+              type: "string",
+              description:
+                "Language code for game names and descriptions (default: en)",
+              default: "en",
+            },
+          },
+          required: ["gameName"],
+        },
+      },
+      {
+        name: "screenscraper_get_game_info",
+        description:
+          "Get detailed information and media assets for a retro game from ScreenScraper.fr. Can search by game ID, name, or ROM checksums (CRC, MD5, SHA1). Returns comprehensive metadata including screenshots, covers, wheels, videos, and more.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            gameId: {
+              type: "number",
+              description: "ScreenScraper game ID",
+            },
+            gameName: {
+              type: "string",
+              description: "Game name to search for",
+            },
+            systemId: {
+              type: "number",
+              description: "Gaming system ID",
+            },
+            crc: {
+              type: "string",
+              description: "ROM CRC checksum",
+            },
+            md5: {
+              type: "string",
+              description: "ROM MD5 checksum",
+            },
+            sha1: {
+              type: "string",
+              description: "ROM SHA1 checksum",
+            },
+            romName: {
+              type: "string",
+              description: "ROM filename",
+            },
+            romSize: {
+              type: "number",
+              description: "ROM file size in bytes",
+            },
+            language: {
+              type: "string",
+              description: "Language code for game information (default: en)",
+              default: "en",
+            },
+          },
+        },
+      },
+    ],
+  };
 });
 
 // Register tool call handler
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    const { name, arguments: args } = request.params;
+  const { name, arguments: args } = request.params;
 
-    try {
-        switch (name) {
-            case 'steam_search_game': {
-                const result = await searchSteamGames(args as any);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steam_get_details': {
-                const result = await getSteamGameDetails(args as any);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steamgrid_get_best_logo': {
-                const result = await getBestGameLogo(args as any, config);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steam_get_dlc_list': {
-                const result = await getSteamDLCList(args as any);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steam_get_reviews_summary': {
-                const result = await getSteamReviewsSummary(args as any);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steam_get_game_news': {
-                const result = await getSteamGameNews(args as any);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steam_get_player_count': {
-                const result = await getSteamPlayerCount(args as any);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steam_get_genres': {
-                const result = await getSteamGenres();
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steam_get_top_sellers': {
-                const result = await getSteamTopSellers(args as any);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steam_get_top_games': {
-                const result = await getSteamTopGames(args as any);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steamgrid_search_game': {
-                const result = await searchSteamGridGames(args as any, config);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'steamgrid_get_assets': {
-                const result = await getSteamGridAssets(args as any, config);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            case 'game_get_full_profile': {
-                const result = await getFullGameProfile(args as any, config);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(result, null, 2),
-                        },
-                    ],
-                };
-            }
-
-            default:
-                throw new Error(`Unknown tool: ${name}`);
-        }
-    } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error occurred';
+  try {
+    switch (name) {
+      case "steam_search_game": {
+        const result = await searchSteamGames(args as any);
         return {
-            content: [
-                {
-                    type: 'text',
-                    text: `Error: ${errorMessage}`,
-                },
-            ],
-            isError: true,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
         };
+      }
+
+      case "steam_get_details": {
+        const result = await getSteamGameDetails(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steamgrid_get_best_logo": {
+        const result = await getBestGameLogo(args as any, config);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steam_get_dlc_list": {
+        const result = await getSteamDLCList(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steam_get_reviews_summary": {
+        const result = await getSteamReviewsSummary(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steam_get_game_news": {
+        const result = await getSteamGameNews(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steam_get_player_count": {
+        const result = await getSteamPlayerCount(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steam_get_genres": {
+        const result = await getSteamGenres();
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steam_get_top_sellers": {
+        const result = await getSteamTopSellers(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steam_get_top_games": {
+        const result = await getSteamTopGames(args as any);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steamgrid_search_game": {
+        const result = await searchSteamGridGames(args as any, config);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "steamgrid_get_assets": {
+        const result = await getSteamGridAssets(args as any, config);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "game_get_full_profile": {
+        const result = await getFullGameProfile(args as any, config);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "screenscraper_get_systems": {
+        const result = await getScreenScraperSystems(config);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "screenscraper_search_game": {
+        const result = await searchScreenScraperGames(args as any, config);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "screenscraper_get_game_info": {
+        const result = await getScreenScraperGameInfo(args as any, config);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      default:
+        throw new Error(`Unknown tool: ${name}`);
     }
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error: ${errorMessage}`,
+        },
+      ],
+      isError: true,
+    };
+  }
 });
 
 // Start server
 async function main() {
-    const transport = new StdioServerTransport();
-    await server.connect(transport);
-    console.error('Game Encyclopedia MCP Server running on stdio');
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error("Game Encyclopedia MCP Server running on stdio");
 }
 
 main().catch((error) => {
-    console.error('Fatal error:', error);
-    process.exit(1);
+  console.error("Fatal error:", error);
+  process.exit(1);
 });

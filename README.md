@@ -32,6 +32,17 @@ A Model Context Protocol (MCP) server that provides structured video game inform
   - Multiple variations with metadata (dimensions, MIME type, author)
 - **steamgrid_get_best_logo**: Get the single best transparent logo for a game
 
+### ScreenScraper Integration
+- **screenscraper_get_systems**: Get a list of all supported retro gaming systems
+- **screenscraper_search_game**: Search for retro games by name with optional system filtering
+- **screenscraper_get_game_info**: Get detailed game information and media assets including:
+  - Game metadata (developer, publisher, release date, rating)
+  - Screenshots, covers, and boxart
+  - Wheel logos and marquees
+  - Video previews
+  - Fan art and cartridge images
+  - Support for ROM identification via checksums (CRC, MD5, SHA1)
+
 ### Unified Tools
 - **game_get_full_profile**: Get a comprehensive game profile in a single request, aggregating metadata from Steam and community visual assets from SteamGridDB. This is the **recommended tool** for providing a complete overview of a game.
 
@@ -67,9 +78,14 @@ A Model Context Protocol (MCP) server that provides structured video game inform
 
 The server requires the following environment variables:
 
-| Variable | Description |
-|----------|-------------|
-| `STEAMGRIDDB_API_KEY` | Your SteamGridDB API key |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `STEAMGRIDDB_API_KEY` | Yes | Your SteamGridDB API key |
+| `SCREENSCRAPER_DEV_ID` | No | ScreenScraper developer ID (for retro games) |
+| `SCREENSCRAPER_DEV_PASSWORD` | No | ScreenScraper developer password |
+| `SCREENSCRAPER_USER_ID` | No | ScreenScraper username (optional, provides higher API quota) |
+| `SCREENSCRAPER_USER_PASSWORD` | No | ScreenScraper user password |
+| `SCREENSCRAPER_SOFTWARE_NAME` | No | Software identifier (defaults to 'game-encyclopedia-mcp-server') |
 
 ## Setup
 
@@ -77,7 +93,17 @@ The server requires the following environment variables:
 Create a `.env` file in the root directory:
 ```env
 STEAMGRIDDB_API_KEY=your_steamgriddb_key_here
+
+# Optional: For retro game support via ScreenScraper
+SCREENSCRAPER_DEV_ID=your_dev_id_here
+SCREENSCRAPER_DEV_PASSWORD=your_dev_password_here
+SCREENSCRAPER_USER_ID=your_username_here
+SCREENSCRAPER_USER_PASSWORD=your_password_here
 ```
+
+To get ScreenScraper credentials:
+- Register at [screenscraper.fr](https://www.screenscraper.fr/)
+- Request developer credentials at the [developer forum](https://www.screenscraper.fr/forumsujets.php?frub=12&numpage=0)
 
 4. **Build the project**
    ```bash
@@ -318,6 +344,73 @@ Get a comprehensive game profile combining metadata from Steam and visual assets
 }
 ```
 
+### 14. screenscraper_get_systems
+
+Get a list of all supported retro gaming systems from ScreenScraper.fr.
+
+**Input:**
+None required.
+
+**Example:**
+```json
+{}
+```
+
+**Returns:** List of systems with ID, name, manufacturer, release date, and supported file extensions.
+
+### 15. screenscraper_search_game
+
+Search for retro games on ScreenScraper.fr by name.
+
+**Input:**
+- `gameName` (string, required): Game name to search for
+- `systemId` (number, optional): Filter by gaming system ID (use `screenscraper_get_systems` to find IDs)
+- `language` (string, optional): Language code for game names and descriptions (default: "en")
+
+**Example:**
+```json
+{
+  "gameName": "Super Mario Bros",
+  "systemId": 4,
+  "language": "en"
+}
+```
+
+**Returns:** List of matching games with metadata including system, developer, publisher, genres, and synopsis.
+
+### 16. screenscraper_get_game_info
+
+Get detailed information and media assets for a retro game from ScreenScraper.fr.
+
+**Input:**
+- `gameId` (number, optional): ScreenScraper game ID
+- `gameName` (string, optional): Game name to search for
+- `systemId` (number, optional): Gaming system ID
+- `crc` (string, optional): ROM CRC checksum
+- `md5` (string, optional): ROM MD5 checksum
+- `sha1` (string, optional): ROM SHA1 checksum
+- `romName` (string, optional): ROM filename
+- `romSize` (number, optional): ROM file size in bytes
+- `language` (string, optional): Language code (default: "en")
+
+**Example (by game ID):**
+```json
+{
+  "gameId": 12345,
+  "systemId": 4
+}
+```
+
+**Example (by ROM checksum):**
+```json
+{
+  "md5": "a31ec74822f6e93f848ac58d9c85716c",
+  "systemId": 4
+}
+```
+
+**Returns:** Comprehensive game information including all available media (screenshots, covers, wheels, marquees, videos, fanarts, boxes, cartridges, maps).
+
 ## Development
 
 ### Scripts
@@ -337,6 +430,7 @@ game-encyclopedia-mcp-server/
 │   └── tools/
 │       ├── steam.ts       # Steam API integration
 │       ├── steamgrid.ts   # SteamGridDB API integration
+│       ├── screenscraper.ts # ScreenScraper API integration
 │       └── unified.ts     # Unified search tool implementation
 ├── package.json
 ├── tsconfig.json
